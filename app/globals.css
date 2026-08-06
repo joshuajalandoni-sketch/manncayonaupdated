@@ -1,0 +1,502 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   MANN CAYONA — DESIGN SYSTEM
+   Aged canvas, natural dyes, Ilonggo textiles, studio light in Tigbauan.
+
+   Layers, in order:
+     1. Primitives   — raw palette, never used directly in components
+     2. Semantics    — what components actually consume
+     3. Tone scopes  — light / dark section inversion
+     4. @theme       — token → Tailwind utility mapping
+     5. Base         — element defaults
+     6. Utilities    — a small set of house primitives
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. PRIMITIVES
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* --- Canvas: unprimed linen, aged paper, lime-washed studio wall --------
+     The neutral spine of the site. Warm-biased — there is no cool grey here,
+     because there is no cool grey in a Tigbauan afternoon. */
+  --canvas-50:  #fbf9f4;   /* bleached ground, highlight */
+  --canvas-100: #f5f1e8;   /* primary paper — the site's default background */
+  --canvas-200: #ede7d9;   /* surface, alternating band */
+  --canvas-300: #e2dac7;   /* raised / sunken surface */
+  --canvas-400: #cec3a9;   /* strong hairline */
+  --canvas-500: #b3a788;   /* taupe, decorative rule */
+  --canvas-600: #948970;   /* muted foreground — captions, meta */
+  --canvas-700: #6e6553;   /* muted deep */
+
+  /* --- Ink: warm oil black. Never #000 — pure black does not exist in paint. */
+  --ink-950: #14130f;      /* gesso black, dark section ground */
+  --ink-900: #1e1c17;
+  --ink-800: #2a2721;      /* primary reading ink */
+  --ink-700: #3b3730;
+  --ink-600: #514c41;
+
+  /* --- Natural dyes ------------------------------------------------------
+     Named for their source, the way a weaver would name them.
+     These are accents, not surfaces. Used sparingly, they read as pigment. */
+  --achuete-600: #a4502e;  /* annatto seed — deep */
+  --achuete-500: #b75e38;  /* annatto seed — the signature accent */
+  --achuete-400: #c87b54;  /* annatto, thinned */
+
+  --tayum-700:   #1b303d;  /* indigo — hablon's oldest blue, deep vat */
+  --tayum-500:   #2c4757;  /* indigo — standard vat */
+  --tayum-300:   #55707f;  /* indigo, exhausted vat */
+
+  --dulaw-500:   #be9245;  /* turmeric ochre */
+  --dulaw-300:   #d2ae6e;  /* turmeric, thinned */
+
+  --dagat-500:   #5c8f86;  /* the sea off the Tigbauan coast */
+  --dagat-300:   #85aca4;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. SEMANTICS  (light tone — the default)
+   Components reference ONLY these. Swapping a primitive here re-skins the site.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --background:      var(--canvas-100);
+  --surface:         var(--canvas-200);
+  --surface-raised:  var(--canvas-50);
+  --surface-sunken:  var(--canvas-300);
+
+  --ink:             var(--ink-800);   /* body copy */
+  --ink-strong:      var(--ink-950);   /* headings, wordmark */
+  --ink-soft:        var(--ink-600);   /* secondary copy */
+
+  /* Text greys are set by contrast, not by eye. canvas-600 and canvas-500 look
+     right on a paper ground but measure 3.08:1 and ~2.1:1 against --background,
+     which fails WCAG AA for the captions and eyebrows they were carrying.
+     These two are tuned to clear 4.5:1 while keeping the warm cast. The
+     canvas-* primitives stay as they are for rules and hairlines, where
+     contrast minimums do not apply. */
+  --muted:           #635b4a;          /* captions, meta, dates — 5.9:1 */
+  --subtle:          #746c59;          /* quietest legible text  — 4.6:1 */
+
+  --hairline:        color-mix(in oklab, var(--canvas-500) 42%, transparent);
+  --hairline-strong: color-mix(in oklab, var(--canvas-700) 38%, transparent);
+
+  --accent:          var(--achuete-500);
+  --accent-hover:    var(--achuete-600);
+  --accent-soft:     var(--achuete-400);
+  --highlight:       var(--dulaw-500);
+  --cool:            var(--tayum-500);
+  --sea:             var(--dagat-500);
+
+  /* Interactive surfaces */
+  --field:           color-mix(in oklab, var(--canvas-50) 70%, transparent);
+  --field-border:    var(--hairline);
+  --ring:            color-mix(in oklab, var(--achuete-500) 55%, transparent);
+
+  /* Selection + scrollbar read as part of the palette, not the browser's */
+  --selection-bg:    color-mix(in oklab, var(--dulaw-300) 60%, transparent);
+  --selection-fg:    var(--ink-950);
+}
+
+
+/* --------------------------------------------------------------------------
+   3. TONE SCOPES
+   Any element can declare data-tone to invert the semantic layer beneath it.
+   This is how "The Cut" goes dark without a single component knowing about it.
+   -------------------------------------------------------------------------- */
+
+[data-tone="dark"] {
+  --background:      var(--ink-950);
+  --surface:         var(--ink-900);
+  --surface-raised:  var(--ink-800);
+  --surface-sunken:  #0d0c0a;
+
+  --ink:             color-mix(in oklab, var(--canvas-100) 92%, transparent);
+  --ink-strong:      var(--canvas-50);
+  --ink-soft:        color-mix(in oklab, var(--canvas-200) 74%, transparent);
+  /* Solid, not alpha-mixed: a translucent grey over an image-backed section
+     has no predictable contrast ratio. 6.8:1 and 4.8:1 on the dark ground. */
+  --muted:           #a99f88;
+  --subtle:          #8d8471;
+
+  --hairline:        color-mix(in oklab, var(--canvas-300) 18%, transparent);
+  --hairline-strong: color-mix(in oklab, var(--canvas-200) 30%, transparent);
+
+  --accent:          var(--achuete-400);
+  --accent-hover:    #d8926c;
+  --accent-soft:     var(--achuete-400);
+  --highlight:       var(--dulaw-300);
+  --cool:            var(--tayum-300);
+  --sea:             var(--dagat-300);
+
+  --field:           color-mix(in oklab, var(--canvas-50) 6%, transparent);
+  --field-border:    var(--hairline);
+  --ring:            color-mix(in oklab, var(--achuete-400) 60%, transparent);
+
+  --selection-bg:    color-mix(in oklab, var(--dulaw-500) 55%, transparent);
+  --selection-fg:    var(--canvas-50);
+
+  color-scheme: dark;
+}
+
+/* Tone scopes paint their own ground when used as a section wrapper.
+   This MUST stay inside @layer base. Unlayered rules outrank every Tailwind
+   utility, so at the top level this would silently beat `bg-transparent` and
+   `bg-background/98` on anything that also carries data-tone — which is how a
+   translucent nav or lightbox ends up opaque for no visible reason. */
+@layer base {
+  [data-tone] {
+    background-color: var(--background);
+    color: var(--ink);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   4. THEME  — token → utility mapping
+   `inline` is required for the semantic block so utilities emit var(--x)
+   and therefore respond to [data-tone] overrides at runtime.
+   -------------------------------------------------------------------------- */
+
+@theme inline {
+  --color-background:      var(--background);
+  --color-surface:         var(--surface);
+  --color-surface-raised:  var(--surface-raised);
+  --color-surface-sunken:  var(--surface-sunken);
+
+  --color-ink:             var(--ink);
+  --color-ink-strong:      var(--ink-strong);
+  --color-ink-soft:        var(--ink-soft);
+  --color-muted:           var(--muted);
+  --color-subtle:          var(--subtle);
+
+  --color-hairline:        var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+
+  --color-accent:          var(--accent);
+  --color-accent-hover:    var(--accent-hover);
+  --color-accent-soft:     var(--accent-soft);
+  --color-highlight:       var(--highlight);
+  --color-cool:            var(--cool);
+  --color-sea:             var(--sea);
+
+  --color-field:           var(--field);
+  --color-field-border:    var(--field-border);
+}
+
+@theme {
+  /* --- Typography ------------------------------------------------------
+     Newsreader — refined editorial serif. Variable optical size means it
+     stays elegant at 8rem and stays readable at 1rem. Its italic is the
+     reason it was chosen: the voice leans on emphasis ("Then reweave.").
+     Karla — humanist grotesque with a warm, slightly narrow set. Carries
+     long-form copy without the corporate chill of Inter.
+     Both are self-hosted at build time via next/font — no external request. */
+  --font-display: var(--font-newsreader), "Newsreader", "Iowan Old Style",
+                  "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans:    var(--font-karla), "Karla", ui-sans-serif, system-ui,
+                  -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono:    ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, monospace;
+
+  /* Fluid type scale. Every step clamps, so there are no breakpoint jumps —
+     the page resizes the way cloth drapes, continuously. */
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.2em;
+  --text-eyebrow--font-weight: 500;
+
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.01em;
+
+  --text-meta: 0.875rem;
+  --text-meta--line-height: 1.55;
+  --text-meta--letter-spacing: 0.015em;
+
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.72;
+
+  --text-body-lg: clamp(1.125rem, 0.35vw + 1.05rem, 1.3125rem);
+  --text-body-lg--line-height: 1.68;
+
+  --text-lead: clamp(1.3125rem, 0.9vw + 1.1rem, 1.75rem);
+  --text-lead--line-height: 1.5;
+  --text-lead--letter-spacing: -0.005em;
+
+  --text-h4: clamp(1.1875rem, 0.5vw + 1.06rem, 1.5rem);
+  --text-h4--line-height: 1.35;
+  --text-h4--letter-spacing: -0.01em;
+
+  --text-h3: clamp(1.5rem, 1.2vw + 1.2rem, 2.125rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.015em;
+
+  --text-h2: clamp(2rem, 3.2vw + 1.2rem, 3.5rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.022em;
+
+  --text-h1: clamp(2.625rem, 5.2vw + 1.2rem, 5rem);
+  --text-h1--line-height: 1.04;
+  --text-h1--letter-spacing: -0.028em;
+
+  --text-display: clamp(3.25rem, 9.5vw + 0.5rem, 8.5rem);
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: -0.035em;
+
+  /* --- Layout rhythm ---------------------------------------------------
+     Two tokens govern every section on the site. Change these and the whole
+     document re-breathes together. */
+  --spacing-gutter:        clamp(1.5rem, 5vw, 6rem);   /* horizontal inset */
+  --spacing-section:       clamp(5.5rem, 10vw, 10.5rem);
+  --spacing-section-tight: clamp(3.5rem, 6vw, 6rem);
+  --spacing-section-loose: clamp(8rem, 15vw, 16rem);
+  --spacing-stack:         clamp(1.75rem, 3vw, 3rem);  /* between blocks */
+
+  /* --- Measure ---------------------------------------------------------
+     Named for what they hold, not how wide they are. */
+  /* Named `measure`, not `prose` — Tailwind ships a built-in `max-w-prose`
+     (65ch) that would win over a same-named token and silently triple the
+     reading column. */
+  --container-measure: 36rem;   /* ~64ch — the reading column */
+  --container-text:    46rem;   /* long-form with pull quotes */
+  --container-content: 78rem;   /* standard grid */
+  --container-wide:    92rem;   /* gallery grid, near-bleed */
+
+  /* --- Radius ----------------------------------------------------------
+     Deliberately near-zero. A cut canvas edge is straight. Rounding it
+     would be the one detail that made the whole site look like a template. */
+  --radius-none: 0px;
+  --radius-xs:   1px;
+  --radius-sm:   2px;
+  --radius-md:   3px;
+  --radius-lg:   6px;
+  --radius-full: 9999px;
+
+  /* --- Shadow ----------------------------------------------------------
+     Ink-tinted, never black; offset downward as if lit by a high window.
+     `hang` is the one that matters — it reads as a framed object on a wall. */
+  --shadow-raise: 0 1px 2px color-mix(in oklab, var(--ink-950) 5%, transparent);
+  --shadow-lift:  0 2px 4px color-mix(in oklab, var(--ink-950) 5%, transparent),
+                  0 8px 20px -6px color-mix(in oklab, var(--ink-950) 8%, transparent);
+  --shadow-hang:  0 1px 1px color-mix(in oklab, var(--ink-950) 6%, transparent),
+                  0 10px 22px -8px color-mix(in oklab, var(--ink-950) 12%, transparent),
+                  0 28px 60px -24px color-mix(in oklab, var(--ink-950) 16%, transparent);
+  --shadow-inset-edge: inset 0 0 0 1px color-mix(in oklab, var(--ink-950) 7%, transparent);
+
+  /* --- Motion ----------------------------------------------------------
+     House rule: nothing overshoots. There is no back-ease, no spring, no
+     bounce anywhere in this system. Cloth settles; it does not rebound.
+     Every curve below ends flat. */
+  --ease-weave:  cubic-bezier(0.22, 0.61, 0.36, 1);   /* general purpose */
+  --ease-thread: cubic-bezier(0.16, 1, 0.3, 1);       /* long, settling exit */
+  --ease-loom:   cubic-bezier(0.65, 0, 0.35, 1);      /* symmetric, reversible */
+  --ease-draw:   cubic-bezier(0.33, 0, 0.13, 1);      /* slow start — curtains */
+
+  --duration-instant: 120ms;
+  --duration-quick:   240ms;
+  --duration-base:    420ms;
+  --duration-slow:    680ms;
+  --duration-drape:   1000ms;
+  --duration-weave:   1500ms;
+
+  /* Stagger unit. Reveals are offset by multiples of this, never randomised. */
+  --delay-thread: 90ms;
+
+  --animate-rise:    rise var(--duration-slow) var(--ease-thread) both;
+  --animate-fade:    fade var(--duration-base) var(--ease-weave) both;
+  --animate-curtain: curtain var(--duration-drape) var(--ease-draw) both;
+  --animate-sweep:   sweep 1.6s var(--ease-loom) infinite;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes curtain {
+    from { clip-path: inset(0 0 100% 0); }
+    to   { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes sweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(400%); }
+  }
+}
+
+/* Write `tone-dark:` in front of any utility to target dark sections. */
+@custom-variant tone-dark (&:where([data-tone="dark"], [data-tone="dark"] *));
+
+/* Tailwind has no `--duration-*` theme namespace — `duration-*` accepts bare
+   numbers only. These make the named motion tokens usable as utilities so
+   components never hard-code a millisecond value. */
+@utility duration-instant { transition-duration: var(--duration-instant); }
+@utility duration-quick   { transition-duration: var(--duration-quick); }
+@utility duration-base    { transition-duration: var(--duration-base); }
+@utility duration-slow    { transition-duration: var(--duration-slow); }
+@utility duration-drape   { transition-duration: var(--duration-drape); }
+@utility duration-weave   { transition-duration: var(--duration-weave); }
+
+
+/* --------------------------------------------------------------------------
+   5. BASE
+   -------------------------------------------------------------------------- */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--hairline);
+  }
+
+  html {
+    /* Anchor targets clear the fixed nav rather than hiding beneath it. */
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.72;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--ink-strong);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  /* Numerals in specs, prices and dates should never jitter between rows. */
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  /* Hairline scrollbar in the palette's own colours. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--hairline-strong) transparent;
+  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--hairline-strong);
+    border-radius: var(--radius-full);
+  }
+
+  img, video { display: block; max-width: 100%; height: auto; }
+
+  /* Global honouring of the OS motion preference. The system is built so
+     that removing motion removes nothing but motion — no content depends
+     on an animation having run. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   6. HOUSE UTILITIES
+   -------------------------------------------------------------------------- */
+
+@layer utilities {
+  /* The only decorative texture in the system: a faint paper tooth over the
+     ground plane. Sub-perceptual on its own — it exists so large flat fills
+     never read as flat digital colour. */
+  .texture-canvas {
+    position: relative;
+    isolation: isolate;
+  }
+  .texture-canvas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3C/svg%3E");
+  }
+  [data-tone="dark"] .texture-canvas::before,
+  [data-tone="dark"].texture-canvas::before {
+    mix-blend-mode: screen;
+    opacity: 0.05;
+  }
+
+  /* Warp lines — a vertical thread field. Used behind hero/process grounds. */
+  .texture-warp {
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--hairline) 0 1px,
+      transparent 1px 7px
+    );
+  }
+
+  /* A rule that fades out at both ends, like a thread losing tension. */
+  .rule-thread {
+    height: 1px;
+    border: 0;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--hairline-strong) 18%,
+      var(--hairline-strong) 82%,
+      transparent
+    );
+  }
+
+  /* Link underline that draws in from the left instead of switching on. */
+  .link-weave {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size var(--duration-base) var(--ease-weave);
+  }
+  .link-weave:hover,
+  .link-weave:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+}
